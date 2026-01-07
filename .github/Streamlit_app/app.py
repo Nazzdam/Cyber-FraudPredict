@@ -166,7 +166,7 @@ try:
         annot=True,
         fmt=".2%",
         cmap="Reds",
-        cbar_kws={'label': 'Fraud Rate'}
+        cbar_kws={'label': 'Fraud Rate'},
         linewidths=0.5,
         ax=ax
     )
