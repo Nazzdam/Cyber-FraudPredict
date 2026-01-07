@@ -38,7 +38,7 @@ based on transaction metadata, user behaviour, and market stress conditions.
 
 st.sidebar.header("input transaction features")
 
-Aomunt=st.sidebar.number_input("AmountZAR", 1.0, 1000000.0, 250.50)
+Amount=st.sidebar.number_input("AmountZAR", 1.0, 1000000.0, 250.50)
 Hours=st.sidebar.number_input("HourOfDay", 0, 23, 12)
 Weekday=st.sidebar.number_input("DayOfWeeek, (0=Mon)", list(range(7)))
 DeviceType=st.sidebar.selectbox("DevciceType", ["Mobile", "Desktop", "Tablet"])
@@ -64,3 +64,79 @@ Repo=st.sidebar.number_input("Repo Rate (%)", 3.0, 12.0, 6.5, step=0.25)
 StressFlag=st.sidebar.selectbox("Market Stress Flag", [0, 1])
 IsNight=st.sidebar.selectbox("Is Night Transaction", [0, 1])
 DeviceCountryMismatch=st.sidebar.selectbox("Device-Country Mismatch", [0, 1])
+
+# -----------------------------
+# Construct a single-row dataframe
+# -----------------------------
+
+InputData=pd.DataFrame({
+    'Amount': [Amount],
+    'HourOfDay': [Hours],
+    'DayOfWeek': [Weekday],
+    'UserTx1H': [UserTx1H],
+    'UserTx24H': [UserTx24H],
+    'UserTx7D': [UserTx7D],
+    'UserAmtMean': [UserAmtMean],
+    'AmtZscore': [AmtZscore],
+    
+    'DeviceType': [DeviceType],
+    'MerchantCategory': [MerchantCategory],
+    'Country': [Country],
+    
+    'UsdZarRet': [UsdZarRet],
+    'UsdZarVol': [UsdZarVol],
+    'Vix': [Vix],
+    'Vix7D': [Vix7D],
+    'Repo': [Repo],
+    'StressFlag': [StressFlag],
+    'IsNight': [IsNight],
+    'DeviceCountryMismatch': [DeviceCountryMismatch]
+})
+
+# -----------------------------
+# Prediction button
+# -----------------------------
+
+st.subheader("🔍 Prediction Results")
+
+if st.button("Run fraud results"):
+    #preprocess
+    XProc=preprocessor.transform(InputData)
+    #predict
+    Prob=model.predict_proba(XProc)[0][1]
+    ProbPct=round(Prob*100,2)
+  
+  # Risk message
+    if Prob < 0.05:
+        risk = ("🟢 LOW RISK", "green")
+    elif Prob < 0.20:
+        risk = ("🟡 MEDIUM RISK", "orange")
+    else:
+        risk = ("🔴 HIGH RISK", "red")
+
+    st.markdown(f"### Fraud Probability: **{ProbPct}%**")
+    st.markdown(
+        f"<h3 style='color:{risk[1]}; font-weight:bold;'>{risk[0]}</h3>",
+        unsafe_allow_html=True
+    )
+
+#Market stress badge
+    if StressFlag==1:
+        st.mardwon("⚠️ **Market Stress Conditions Detected!** ⚠️")
+    else:
+        st.markdown("✅ **Normal Market Conditions** ✅")
+
+    #-----------------------------
+    #SHAP Explanation
+    # -----------------------------
+    st.markdown("### 🔎 Model Explanation")
+    ShapVal=explainer.shap_values(XProc)
+
+    fig, ax=plt.subplots(figsize=(10,4))
+    shap.waterfall_plot=getattr(shap.plots, "watefrfall", None)
+    shap.waterfall_plot(explainer.expected_value, ShapVal[0], feature_names=preprocessor.get_feature_names_out(), max_display=10, show=False)
+
+    st.pyplot(fig)
+
+else:
+    st.info("⚠️ Click the 'Run fraud results' button to generate predictions based on the input features.")
