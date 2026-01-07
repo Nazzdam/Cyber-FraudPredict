@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 import shap
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(
     page_title="Fraud & Cyber-Threat Prediction",
@@ -125,7 +126,9 @@ if st.button("Run fraud results"):
         st.mardwon("⚠️ **Market Stress Conditions Detected!** ⚠️")
     else:
         st.markdown("✅ **Normal Market Conditions** ✅")
+        
 
+    
     #-----------------------------
     #SHAP Explanation
     # -----------------------------
@@ -140,3 +143,63 @@ if st.button("Run fraud results"):
 
 else:
     st.info("⚠️ Click the 'Run fraud results' button to generate predictions based on the input features.")
+    
+# ------------------------------------------------------------------------------
+# Fraud Heatmap: Device Type × Merchant Category
+# ------------------------------------------------------------------------------
+st.subheader("📊 Fraud Heatmap: Device Type × Merchant Category")
+@st.cache_data
+def LoadHetmapData():
+   return pd.read_csv("/Users/milanichikeka/Downloads/my_dataset.csv")
+
+try:
+    DfFull=LoadHetmapData()
+    HeatMapData=(
+        DfFull.groupby(['DeviceType', 'MerchantCategory'])['IsFraud'].mean()
+    .reset_index()
+    .pivot(index='DeviceType', columns='MerchantCategory', values='IsFraud')
+    )
+    
+    Fig2, ax=plt.subplots(figsize=(10,6))
+    sns.heatmap(
+        HeatMapData,
+        annot=True,
+        fmt=".2%",
+        cmap="Reds",
+        cbar_kws={'label': 'Fraud Rate'}
+        linewidths=0.5,
+        ax=ax
+    )
+    
+    ax.set_title("Fraud Rate by Device Type and Merchant Category")
+    st.pyplot(Fig2)
+except Exception as e:
+    st.info("⚠️ Unable to load heatmap data at this time.")
+    st.error(f"Error details: {e}")
+    
+# ------------------------------------------------------------------------------
+# Fraud Heatmap: Country
+# ------------------------------------------------------------------------------
+st.subheader("📊 Fraud Heatmap: Transaction Country")    
+try:
+    CountryHeatmapData=(
+        DfFull.groupby('Country')['IsFraud'].mean().reset_index()
+    )
+    
+    Fig3, ax=plt.subplots(figsize=(8,4))
+    sns.heatmap(
+        CountryHeatmapData.set_index('Country').T,
+        annot=True,
+        cmap="Blues",
+        fmt=".3f",
+        linewidths=0.5,
+        ax=ax
+    )
+    
+    ax.set_ylabel("Fraud Rate by country")
+    ax.set_title("Fraud Rate by Transaction Country")
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0%}'.format(y)))
+    st.pyplot(Fig3)
+except Exception as e:
+    st.info("⚠️ Unable to load country heatmap data at this time.")
+    st.error(f"Error details: {e}")
