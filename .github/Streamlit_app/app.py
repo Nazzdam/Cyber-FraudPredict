@@ -41,7 +41,7 @@ st.sidebar.header("input transaction features")
 
 Amount=st.sidebar.number_input("AmountZAR", 1.0, 1000000.0, 250.50)
 Hours=st.sidebar.number_input("HourOfDay", 0, 23, 12)
-Weekday=st.sidebar.number_input("DayOfWeeek, (0=Mon)", list(range(7)))
+Weekday=st.sidebar.number_input("DayOfWeek, (0=Mon)", min_value=0, max_value=6, value=0)
 DeviceType=st.sidebar.selectbox("DevciceType", ["Mobile", "Desktop", "Tablet"])
 MerchantCategory=st.sidebar.selectbox("MerchantCategory", 
                                  ["Electronics", "Clothing", "Groceries", "Travel", "Entertainment"])
@@ -58,7 +58,7 @@ AmtZscore=st.sidebar.number_input("Amount Z-Score", -5.0, 10.0, 0.5)
 #Market Stress Features
 st.sidebar.header("Market Stress Indicators")
 UsdZarRet=st.sidebar.number_input("USDZAR daily return", -0.2, 0.2, 0.01, step=0.001)
-UsdZarVol=st.sidebar.mumber_input("USDZAR 7d volatility", 0.0, 0.2, 0.03, step=0.001)
+UsdZarVol=st.sidebar.number_input("USDZAR 7d volatility", 0.0, 0.2, 0.03, step=0.001)
 Vix=st.sidebar.number_input("VIX Index level", 5.0, 80.0, 18.0,step=1.0)
 Vix7D=st.sidebar.number_input("VIX 7d mean", 5.0, 80.0, 16.0, step=1.0)
 Repo=st.sidebar.number_input("Repo Rate (%)", 3.0, 12.0, 6.5, step=0.25)
