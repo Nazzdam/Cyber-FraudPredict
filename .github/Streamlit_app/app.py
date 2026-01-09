@@ -18,7 +18,7 @@ st.set_page_config(
 @st.cache_resource
 def LoadArtifacts():
     pre=joblib.load("models/preprocessor.joblib")
-    model=joblib.load("gbm_model.joblib")
+    model=joblib.load("models/lgbm_model.joblib")
     return pre, model
 
 preprocessor, model=LoadArtifacts()
